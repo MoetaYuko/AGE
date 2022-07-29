@@ -14,6 +14,26 @@ def sample_mask(idx, l):
     mask[idx] = 1
     return np.array(mask, dtype=np.bool)
 
+def sdcn_load_graph(dataset):
+    path = 'data/{}_graph.txt'.format(dataset)
+
+    data = np.loadtxt('data/{}.txt'.format(dataset))
+    n, _ = data.shape
+
+    idx = np.array([i for i in range(n)], dtype=np.int32)
+    idx_map = {j: i for i, j in enumerate(idx)}
+    edges_unordered = np.genfromtxt(path, dtype=np.int32)
+    edges = np.array(list(map(idx_map.get, edges_unordered.flatten())),
+                     dtype=np.int32).reshape(edges_unordered.shape)
+    adj = sp.coo_matrix((np.ones(edges.shape[0]), (edges[:, 0], edges[:, 1])),
+                        shape=(n, n), dtype=np.float32)
+
+    return adj
+
+def sdcn_load_data(dataset):
+    x = np.loadtxt('data/{}.txt'.format(dataset), dtype=float)
+    y = np.loadtxt('data/{}_label.txt'.format(dataset), dtype=int)
+    return x, y
 
 def load_data(dataset):
     # load the data: x, tx, allx, graph
@@ -21,6 +41,11 @@ def load_data(dataset):
     objects = []
     if dataset == 'wiki':
         adj, features, label = load_wiki()
+        return adj, features, label, 0, 0, 0
+
+    if dataset in ['acm', 'dblp']:
+        adj = sdcn_load_graph(dataset)
+        features, label = sdcn_load_data(dataset)
         return adj, features, label, 0, 0, 0
 
     for i in range(len(names)):

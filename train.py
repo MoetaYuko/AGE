@@ -82,22 +82,13 @@ def update_threshold(upper_threshold, lower_treshold, up_eta, low_eta):
 
 def gae_for(args):
     print("Using {} dataset".format(args.dataset))
-    if args.dataset == 'cora':
-        n_clusters = 7
-        Cluster = SpectralClustering(n_clusters=n_clusters, affinity = 'precomputed', random_state=0)
-    elif args.dataset == 'citeseer':
-        n_clusters = 6
-        Cluster = SpectralClustering(n_clusters=n_clusters, affinity = 'precomputed', random_state=0)
-    elif args.dataset == 'pubmed':
-        n_clusters = 3
-        Cluster = SpectralClustering(n_clusters=n_clusters, affinity = 'precomputed', random_state=0)
-    elif args.dataset == 'wiki':
-        n_clusters = 17
-        Cluster = SpectralClustering(n_clusters=n_clusters, affinity = 'precomputed', random_state=0)
-    
+
     adj, features, true_labels, idx_train, idx_val, idx_test = load_data(args.dataset)
     n_nodes, feat_dim = features.shape
     dims = [feat_dim] + args.dims
+
+    n_clusters = len(np.unique(true_labels))
+    Cluster = SpectralClustering(n_clusters=n_clusters, affinity='precomputed', random_state=0)
     
     layers = args.linlayers
     # Store original adjacency matrix (without diagonal entries) for later
